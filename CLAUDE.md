@@ -1,6 +1,6 @@
 # CLAUDE.md
-统一用中文写文档，写命名，以及对话。
-
+统一用中文写文档，写命名，以及对话和注释，但是代码以及绘图用英文。
+source ~/miniconda/etc/profile.d/conda.sh && conda activate pyfstat-dev && python scripts/计算F统计量.py  类似这样配置环境。
 
 ## 角色定义
 
