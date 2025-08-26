@@ -19,7 +19,7 @@ class SignalConfig:
     Tsft: int = 1800           # SFT时长（秒），标准值30分钟
     
     # 信号强度控制
-    depth: float = 10.0        # 信号深度（SNR相关）
+    depth: float = 0.1       # 信号深度（SNR相关）
     
     # 注入信号参数（用于生成SFT数据）
     injection_F0: float = 30.0      # 注入信号频率 (Hz)

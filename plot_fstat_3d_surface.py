@@ -78,7 +78,7 @@ def plot_fstat_3d_surface():
         
         # F1范围（全负数）
         f1_center = config.injection_F1
-        f1_range = 9e-9
+        f1_range = 9e-8
         y_min = f1_center - f1_range   # 更负
         y_max = f1_center + f1_range    # 较小负值
         y_points = 1000
