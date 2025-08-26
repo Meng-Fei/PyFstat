@@ -19,13 +19,13 @@ class SignalConfig:
     Tsft: int = 1800           # SFT时长（秒），标准值30分钟
     
     # 信号强度控制
-    depth: float = 30.0        # 信号深度（SNR相关）
+    depth: float = 10.0        # 信号深度（SNR相关）
     
     # 注入信号参数（用于生成SFT数据）
     injection_F0: float = 30.0      # 注入信号频率 (Hz)
     injection_F1: float = -1e-10    # 注入信号频率导数 (Hz/s)
-    injection_Alpha: float = 1.0    # 注入信号赤经 (radians)
-    injection_Delta: float = 0.5    # 注入信号赤纬 (radians)
+    injection_Alpha: float = 0    # 注入信号赤经 (radians)
+    injection_Delta: float = 1.5    # 注入信号赤纬 (radians)
     
     # 其他固定参数（F统计量中被解析最大化的参数）
     F2: float = 0.0            # 频率二阶导数，通常为0

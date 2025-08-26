@@ -97,3 +97,8 @@ dmypy.json
 # 系统文件
 Thumbs.db
 .directory
+
+
+.png
+
+temp_results
