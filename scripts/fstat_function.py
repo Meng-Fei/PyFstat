@@ -6,6 +6,7 @@ import os
 import shutil
 import tempfile
 import logging
+import numpy as np
 import pyfstat
 from signal_config import SignalConfig
 
@@ -44,7 +45,7 @@ class FStatFunction:
         self.tempdir = tempfile.mkdtemp(prefix="fstat_func_")
         
         # 生成SFT数据（只做一次）
-        # 使用适中的Band以支持合理的频率范围
+        # Band=5.0Hz，实际频率搜索范围：27.5-32.5Hz
         writer = pyfstat.Writer(
             label="fstatfunc",
             outdir=self.tempdir,
@@ -53,13 +54,13 @@ class FStatFunction:
             detectors=config.detectors,
             sqrtSX=config.sqrtSX,
             Tsft=config.Tsft,
-            Band=5.0,  # 5Hz带宽，覆盖27.5-32.5Hz
-            # 注入参数（弱信号，主要是为了生成有效的SFT）
-            F0=30.0,
-            F1=-1e-10,
+            Band=5.0,  # 5Hz带宽，实际频率范围：27.5-32.5Hz
+            # 注入信号参数（从config读取）
+            F0=config.injection_F0,
+            F1=config.injection_F1,
             F2=config.F2,
-            Alpha=1.0,
-            Delta=0.5,
+            Alpha=config.injection_Alpha,
+            Delta=config.injection_Delta,
             h0=config.h0,
             cosi=config.cosi,
             psi=config.psi,
@@ -73,18 +74,16 @@ class FStatFunction:
         self.sft_band = writer.Band
         
         # 初始化ComputeFstat对象
-        # 使用实际的SFT频率范围，稍微收缩以避免边界问题
-        actual_fmax = writer.fmin + writer.Band
-        # SFT频率bin的宽度
-        df = 1.0 / writer.Tsft
-        # 稍微收缩范围以避免边界错误
+        # 不使用search_ranges，让ComputeFstat作为纯计算器
+        # minCoverFreq=-0.5让PyFstat自动从SFT文件推断频率覆盖
         self.compute_fstat = pyfstat.ComputeFstat(
             sftfilepattern=writer.sftfilepath,
             tref=config.tref,
             minStartTime=config.tstart,
             maxStartTime=config.tstart + config.duration,
-            minCoverFreq=writer.fmin + df,  # 跳过第一个bin
-            maxCoverFreq=actual_fmax - 2*df  # 跳过最后两个bin
+            minCoverFreq=-0.5,  # 自动从SFT文件推断频率覆盖范围
+            maxCoverFreq=-0.5,  # -0.5是特殊值，表示自动推断
+            # 不设置search_ranges！这是关键
         )
         
     def __call__(self, F0: float, F1: float, Alpha: float, Delta: float) -> float:
@@ -109,15 +108,14 @@ class FStatFunction:
         float
             2F统计量值
         """
-        params = {
-            'F0': F0,
-            'F1': F1,
-            'F2': self.config.F2,  # 使用配置中的F2
-            'Alpha': Alpha,
-            'Delta': Delta
-        }
-        
-        return self.compute_fstat.get_fullycoherent_twoF(params=params)
+        # 直接传递参数，不使用params字典
+        return self.compute_fstat.get_fullycoherent_twoF(
+            F0=F0,
+            F1=F1, 
+            F2=self.config.F2,
+            Alpha=Alpha,
+            Delta=Delta
+        )
     
     def __del__(self):
         """清理临时文件"""
